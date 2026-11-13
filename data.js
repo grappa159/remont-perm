@@ -8,7 +8,7 @@ window.CONFIG = {
   whatsapp: '',         // например '79991234567' — смета будет уходить в WhatsApp
   telegram: '',         // например 'master_evgeniy'
   avitoUrl: 'https://www.avito.ru/perm/predlozheniya_uslug/remont_otdelka_santehnika_elektrika_8286887819',
-  showDemoBadge: true,
+  showDemoBadge: false,
   devName: 'Разработчик: Иван',
   devLink: '',
 };
