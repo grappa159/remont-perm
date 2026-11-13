@@ -32,46 +32,179 @@ function cartLines() {
 }
 const total = () => cartLines().reduce((s, l) => s + l.sum, 0);
 
-/* ---------- услуги ---------- */
+/* ---------- услуги: матрица «что входит» ---------- */
 function renderServices() {
-  const cards = PRICE.map(c => {
-    const prices = c.items.map(i => i[1]).filter(Boolean);
+  $('#servicesGrid').innerHTML = PRICE.map((c, i) => {
+    const prices = c.items.map(it => it[1]).filter(Boolean);
     const min = prices.length ? `от ${rub(Math.min(...prices))}` : 'по замеру';
-    return `<button class="svc" data-cat="${c.id}">
-      <span class="svc__icon">${icon(c.icon)}</span>
-      <h3>${esc(c.title)}</h3><p>${esc(c.text)}</p>
-      <span class="svc__foot"><em>${min}</em><span>${c.items.length} поз. ${icon('arrow')}</span></span>
-    </button>`;
+    const incl = c.items.slice(0, 4).map(it => `<li>${esc(it[0])}</li>`).join('');
+    const more = c.items.length > 4 ? `<li class="more">и ещё ${c.items.length - 4}</li>` : '';
+    return `<article class="mx" data-cat="${c.id}">
+      <div class="mx__name"><span class="mx__num">${String(i + 1).padStart(2, '0')}</span><span class="mx__icon">${icon(c.icon)}</span><div><h3>${esc(c.title)}</h3><p>${esc(c.text)}</p></div></div>
+      <ul class="mx__incl">${incl}${more}</ul>
+      <div class="mx__price"><b>${min}</b><span>${c.items.length} ${plural(c.items.length, ['позиция', 'позиции', 'позиций'])} в прайсе</span></div>
+      <button class="mx__btn" data-open="${c.id}">Цены ${icon('arrow')}</button>
+    </article>`;
   }).join('');
-  $('#servicesGrid').innerHTML = cards + `<a class="svc svc--cta" href="#packs">
-    <span class="svc__icon" style="background:rgba(255,255,255,.2);color:#fff">${icon('check')}</span>
-    <h3>Всё сразу — под ключ</h3><p>Квартира, дом, комната или санузел: соберём смету одним нажатием.</p>
-    <span class="svc__foot"><span>Выбрать объект</span>${icon('arrow')}</span></a>`;
   $('#servicesGrid').addEventListener('click', e => {
-    const b = e.target.closest('[data-cat]');
-    if (b) openCat(b.dataset.cat);
+    const b = e.target.closest('[data-open]') || e.target.closest('.mx');
+    if (b) openCat(b.dataset.open || b.dataset.cat);
   });
-  $('#heroCount').textContent = PRICE.reduce((s, c) => s + c.items.length, 0);
+  const hc = $('#heroCount'); if (hc) hc.textContent = PRICE.reduce((s, c) => s + c.items.length, 0);
 }
 
-/* ---------- пакеты ---------- */
-function renderPacks() {
-  $('#packsGrid').innerHTML = PACKS.map(p => `
-    <article class="pack" data-pack="${p.id}">
-      <div><h3>${esc(p.title)}</h3><span class="pack__min">Минимальный объём ${esc(p.min)}</span></div>
-      <ul class="pack__cats">${p.cats.map(id => `<li><button data-cat="${id}">${esc(catById(id).short)}</button></li>`).join('')}</ul>
-      <button class="btn btn--line btn--sm" data-add-pack="${p.id}">${icon('plus')} Добавить в смету</button>
-    </article>`).join('');
-  $('#packsGrid').addEventListener('click', e => {
-    const chip = e.target.closest('[data-cat]');
-    if (chip) return openCat(chip.dataset.cat);
-    const b = e.target.closest('[data-add-pack]');
-    if (!b) return;
-    const p = PACKS.find(x => x.id === b.dataset.addPack);
-    p.add.forEach(([cat, name, q]) => { if (findItem(cat, name)) addQty(cat, name, q); });
-    b.closest('.pack').classList.add('is-added');
-    toast(`«${p.title}» добавлен в смету`, true);
+/* ---------- калькулятор (квиз) ---------- */
+let calcSummary = '';
+function initCalc() {
+  const CALC = window.CALC;
+  const st = { obj: null, area: 0, works: new Set(), step: 0 };
+  const body = $('#calcBody'), steps = $$('#calcSteps li');
+  const obj = () => CALC.objects.find(o => o.id === st.obj);
+
+  function compute() {
+    const o = obj(), g = o.geo(st.area), map = new Map(), groups = [];
+    o.works.filter(w => st.works.has(w)).forEach(wid => {
+      const w = CALC.works[wid]; let sum = 0, ask = false;
+      w.items.forEach(([cat, name, fn]) => {
+        const it = findItem(cat, name); if (!it) return;
+        const q = Math.max(1, Math.round(fn(g)));
+        map.set(key(cat, name), (map.get(key(cat, name)) || 0) + q);
+        if (it[1]) sum += it[1] * q; else ask = true;
+      });
+      groups.push({ wid, title: w.title, sum, ask, cat: w.items[0][0] });
+    });
+    return { groups, map, total: groups.reduce((s, x) => s + x.sum, 0) };
+  }
+  const workSum = wid => {
+    const g = obj().geo(st.area);
+    let sum = 0, ask = false;
+    CALC.works[wid].items.forEach(([cat, name, fn]) => {
+      const it = findItem(cat, name); if (!it) return;
+      if (it[1]) sum += it[1] * Math.max(1, Math.round(fn(g))); else ask = true;
+    });
+    return ask && !sum ? 'по замеру' : '≈ ' + rub(sum);
+  };
+  const go = n => {
+    st.step = n;
+    steps.forEach((li, i) => { li.classList.toggle('is-active', i === n); li.classList.toggle('is-done', i < n); });
+    render();
+  };
+
+  function render() {
+    if (st.step === 0) {
+      body.innerHTML = `<h3 class="calc__q">Что ремонтируем?</h3><div class="calc__objs">` +
+        CALC.objects.map(o => `<button class="calc__obj${st.obj === o.id ? ' is-on' : ''}" data-obj="${o.id}"><svg><use href="#i-${o.icon}"/></svg><b>${esc(o.title)}</b><small>объём работ от ${o.min} м²</small></button>`).join('') + `</div>`;
+    } else if (st.step === 1) {
+      const o = obj(), max = o.id === 'bath' ? 15 : o.id === 'house' ? 250 : 150;
+      body.innerHTML = `<h3 class="calc__q">Площадь пола, м²</h3>
+        <div class="calc__area"><input type="number" id="cArea" min="${o.min}" max="500" value="${st.area}" inputmode="numeric" aria-label="Площадь, м²"><span>м²</span></div>
+        <input type="range" id="cRange" min="1" max="${max}" value="${st.area}" aria-label="Площадь">
+        <div class="calc__chips">${o.presets.map(p => `<button data-preset="${p}" class="${p === st.area ? 'is-on' : ''}">${p} м²</button>`).join('')}</div>
+        <p class="calc__hint" id="cHint">Минимальный объём работ для объекта «${esc(o.title)}» — ${o.min} м²</p>
+        <div class="calc__nav"><button class="btn btn--line btn--sm" data-back>Назад</button><button class="btn btn--accent btn--sm" data-next>Далее ${icon('arrow')}</button></div>`;
+    } else if (st.step === 2) {
+      const o = obj();
+      body.innerHTML = `<h3 class="calc__q">Какие работы нужны? <small>${esc(o.title)}, ${st.area} м²</small></h3><div class="calc__works">` +
+        o.works.map(w => `<label class="calc__work${st.works.has(w) ? ' is-on' : ''}"><input type="checkbox" value="${w}" ${st.works.has(w) ? 'checked' : ''}><span>${esc(CALC.works[w].title)}</span><em>${workSum(w)}</em></label>`).join('') +
+        `</div><div class="calc__nav"><button class="btn btn--line btn--sm" data-back>Назад</button><button class="btn btn--accent btn--sm" data-next ${st.works.size ? '' : 'disabled'}>Посчитать ${icon('arrow')}</button></div>`;
+    } else {
+      const o = obj(), r = compute();
+      calcSummary = `${o.title}, ${st.area} м²: ${r.groups.map(g => g.title.toLowerCase()).join(', ')}`;
+      body.innerHTML = `<div class="calc__res">
+        <div class="calc__total"><span>${esc(o.title)}, ${st.area} м² · стоимость работ</span><b>≈ ${rub(Math.round(r.total / 1000) * 1000)}</b>
+        <small>Без материалов. ${r.groups.some(g => g.ask) ? 'Электрика считается на замере. ' : ''}Точная сумма — после бесплатного замера.</small></div>
+        <ul class="calc__lines">${r.groups.map(g => `<li><span>${esc(g.title)}</span><b>${g.ask && !g.sum ? 'по замеру' : rub(g.sum)}</b><button data-goto="${g.cat}">прайс ${icon('arrow')}</button></li>`).join('')}</ul>
+        <div class="calc__actions">
+          <button class="btn btn--accent" data-zamer>Записаться на замер с этим расчётом ${icon('arrow')}</button>
+          <button class="btn btn--line btn--sm" data-tocart>Подробная смета</button>
+          <button class="btn btn--line btn--sm" data-back>Изменить работы</button>
+        </div></div>`;
+    }
+  }
+
+  // расчёт попадает в общую смету (перезаписывает количество, без задвоения)
+  const applyToCart = () => { compute().map.forEach((q, k) => cart.set(k, q)); save(); syncAll(); };
+
+  body.addEventListener('click', e => {
+    const t = e.target.closest('button'); if (!t) return;
+    if (t.dataset.obj) {
+      const o = CALC.objects.find(x => x.id === t.dataset.obj);
+      if (st.obj !== o.id) { st.obj = o.id; st.area = o.def; st.works = new Set(o.on); }
+      return go(1);
+    }
+    if (t.dataset.preset) { st.area = Number(t.dataset.preset); return render(); }
+    if ('back' in t.dataset) return go(st.step - 1);
+    if ('next' in t.dataset) {
+      if (st.step === 1 && st.area < 1) { $('#cHint').classList.add('is-err'); return; }
+      return go(st.step + 1);
+    }
+    if (t.dataset.goto) return openCat(t.dataset.goto);
+    if ('tocart' in t.dataset) { applyToCart(); return window.__openCart(); }
+    if ('zamer' in t.dataset) {
+      applyToCart();
+      $('#reqForm select[name=object]').value = obj().title;
+      $('#zamer').scrollIntoView({ behavior: 'smooth' });
+      setTimeout(() => $('#reqForm input[name=name]').focus({ preventScroll: true }), 700);
+    }
   });
+  body.addEventListener('input', e => {
+    if (e.target.id !== 'cArea' && e.target.id !== 'cRange') return;
+    st.area = Math.max(0, Math.round(Number(e.target.value) || 0));
+    (e.target.id === 'cArea' ? $('#cRange') : $('#cArea')).value = st.area;
+    $$('.calc__chips button', body).forEach(b => b.classList.toggle('is-on', Number(b.dataset.preset) === st.area));
+    $('#cHint').classList.toggle('is-err', st.area < 1);
+  });
+  body.addEventListener('change', e => {
+    if (e.target.type !== 'checkbox') return;
+    e.target.checked ? st.works.add(e.target.value) : st.works.delete(e.target.value);
+    render();
+  });
+  steps.forEach((li, i) => li.addEventListener('click', () => { if (i < st.step) go(i); }));
+  // вход из мини-расчёта на первом экране
+  window.__calcPreset = (objId, area, toStep) => {
+    const o = CALC.objects.find(x => x.id === objId);
+    st.obj = o.id; st.area = area; st.works = new Set(o.on);
+    go(toStep);
+  };
+  window.__calcApply = applyToCart;
+  window.__calcQuick = (objId, area) => {
+    const o = CALC.objects.find(x => x.id === objId), g = o.geo(area);
+    let sum = 0;
+    o.on.forEach(wid => CALC.works[wid].items.forEach(([cat, name, fn]) => {
+      const it = findItem(cat, name); if (it && it[1]) sum += it[1] * Math.max(1, Math.round(fn(g)));
+    }));
+    return { sum, works: o.on.map(w => CALC.works[w].title) };
+  };
+  go(0);
+}
+
+/* ---------- мини-расчёт на первом экране (крючок) ---------- */
+function initMini() {
+  const box = $('#mini'); if (!box) return;
+  const CALC = window.CALC;
+  const ranges = { bath: [2, 12], flat: [20, 120], room: [8, 40] };
+  let obj = 'bath', area = 4;
+  const sync = () => {
+    const [mn, mx] = ranges[obj];
+    const r = $('#miniRange'); r.min = mn; r.max = mx; r.value = area;
+    $('#miniArea').textContent = area;
+    const q = window.__calcQuick(obj, area);
+    $('#miniSum').textContent = rub(Math.round(q.sum / 1000) * 1000);
+    $('#miniWorks').textContent = q.works.join(' · ');
+    $$('#miniTabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.obj === obj));
+  };
+  $('#miniTabs').addEventListener('click', e => {
+    const b = e.target.closest('[data-obj]'); if (!b) return;
+    obj = b.dataset.obj; area = CALC.objects.find(o => o.id === obj).def; sync();
+  });
+  $('#miniRange').addEventListener('input', e => { area = Number(e.target.value); sync(); });
+  $('#miniMore').addEventListener('click', () => { window.__calcPreset(obj, area, 2); $('#calc').scrollIntoView({ behavior: 'smooth' }); });
+  $('#miniZamer').addEventListener('click', () => {
+    window.__calcPreset(obj, area, 3); window.__calcApply();
+    $('#reqForm select[name=object]').value = CALC.objects.find(o => o.id === obj).title;
+    $('#zamer').scrollIntoView({ behavior: 'smooth' });
+  });
+  sync();
 }
 
 /* ---------- прайс ---------- */
@@ -165,11 +298,11 @@ function renderCart() {
         <span>${esc(l.unit)}</span>
         <button class="ci__del" data-del>Убрать</button>
       </span>
-    </div>`).join('') : `<p class="cart__empty">Смета пока пустая.<br>Добавьте работы из прайса или выберите пакет «под ключ».</p>`;
+    </div>`).join('') : `<p class="cart__empty">Смета пока пустая.<br>Посчитайте ремонт в калькуляторе или добавьте работы из прайса.</p>`;
 
   const n = lines.length;
   $('#reqTotal').textContent = rub(total());
-  $('#reqItems').textContent = n ? `${n} ${plural(n, ['позиция', 'позиции', 'позиций'])} в смете · без материалов, точная сумма после замера` : 'Смета пока пустая — добавьте работы из прайса или пакета';
+  $('#reqItems').textContent = n ? `${n} ${plural(n, ['позиция', 'позиции', 'позиций'])} в смете · без материалов, точная сумма после замера` : 'Пока пусто — посчитайте в калькуляторе или добавьте работы из прайса';
 }
 const plural = (n, f) => f[(n % 100 > 4 && n % 100 < 20) ? 2 : [2, 0, 1, 1, 1, 2][Math.min(n % 10, 5)]];
 
@@ -183,7 +316,7 @@ function initCart() {
   shade.addEventListener('click', close);
   addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
   $('#cartToReq').addEventListener('click', close);
-  $('#cartClear').addEventListener('click', () => { cart.clear(); save(); syncAll(); $$('.pack').forEach(p => p.classList.remove('is-added')); });
+  $('#cartClear').addEventListener('click', () => { cart.clear(); save(); syncAll(); });
   $('#cartList').addEventListener('click', e => {
     const w = e.target.closest('.ci')?.querySelector('.qty');
     if (!w) return;
@@ -213,7 +346,8 @@ function initRequest() {
   $('#reqForm').addEventListener('submit', async e => {
     e.preventDefault();
     const f = e.target.elements, lines = cartLines();
-    let text = `Здравствуйте, Евгений! Заявка на ремонт.\nОбъект: ${f.object.value}\nИмя: ${f.name.value}\nТелефон: ${f.phone.value}`;
+    let text = `Здравствуйте, Евгений! Хочу записаться на бесплатный замер.\nОбъект: ${f.object.value}${f.area.value.trim() ? ', ' + f.area.value.trim() : ''}\nИмя: ${f.name.value}\nТелефон: ${f.phone.value}`;
+    if (calcSummary) text += `\nРасчёт на сайте: ${calcSummary}`;
     if (f.comment.value.trim()) text += `\nЗадача: ${f.comment.value.trim()}`;
     if (lines.length) {
       text += `\n\nСмета с сайта:\n` + lines.map(l => `• ${l.name} — ${l.q} ${l.unit}${l.price ? ` × ${l.from ? 'от ' : ''}${rub(l.price)} = ${rub(l.sum)}` : ' (по замеру)'}`).join('\n');
@@ -255,7 +389,7 @@ function initWorks() {
 
 function initReveal() {
   if (!('IntersectionObserver' in window)) return;
-  const els = $$('.head, .svc, .pack, .steps li, .facts div, .work, .request > *');
+  const els = $$('.head, .mx, .pain__item, .compare, .steps li, .facts div, .work, .faq__list, .request > *');
   els.forEach(el => el.classList.add('reveal'));
   const io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) { en.target.classList.add('is-in'); io.unobserve(en.target); } }), { rootMargin: '0px 0px -6% 0px' });
   els.forEach(el => io.observe(el));
@@ -270,12 +404,13 @@ function initDemoBadge() {
 }
 
 renderServices();
-renderPacks();
 renderTabs();
 renderPrice();
 initPriceEvents();
 initCart();
 renderCart();
+initCalc();
+initMini();
 initRequest();
 initHeader();
 initWorks();

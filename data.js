@@ -111,14 +111,42 @@ window.PRICE = [
     ]},
 ];
 
-/* Пакеты «под ключ»: какие разделы и позиции добавляются в смету */
-window.PACKS = [
-  { id: 'bath', title: 'Санузел под ключ', min: 'от 5 м²', cats: ['floors', 'water', 'sewer', 'plumbing', 'walls', 'electric'],
-    add: [['floors', 'Укладка плитки', 15], ['sewer', 'Труба ПВХ Ø30/40/50', 4], ['sewer', 'Труба ПВХ Ø100', 2], ['water', 'Полипропиленовая труба Ø20–25', 8], ['plumbing', 'Установка унитаза, раковины, мойки, поддона', 2], ['plumbing', 'Монтаж смесителя на раковину или мойку', 1], ['plumbing', 'Монтаж смесителя для душа', 1]] },
-  { id: 'flat', title: 'Квартира под ключ', min: 'от 10 м²', cats: ['walls', 'floors', 'masonry', 'water', 'sewer', 'plumbing', 'electric'],
-    add: [['walls', 'Штукатурка стен гипсовым раствором под маячок', 60], ['walls', 'Шпаклёвка финишная, 1 слой', 60], ['walls', 'Окраска, 1 слой', 60], ['floors', 'Выравнивание пола стяжкой', 20], ['floors', 'Укладка ламината', 20], ['floors', 'Монтаж плинтуса', 20]] },
-  { id: 'room', title: 'Комната под ключ', min: 'от 20 м²', cats: ['walls', 'floors', 'electric'],
-    add: [['walls', 'Шпаклёвка финишная, 1 слой', 40], ['walls', 'Оклейка обоев с подгонкой рисунка', 40], ['floors', 'Укладка ламината', 20], ['floors', 'Монтаж плинтуса', 18]] },
-  { id: 'house', title: 'Дом под ключ', min: 'от 10 м²', cats: ['masonry', 'walls', 'floors', 'water', 'sewer', 'plumbing', 'electric'],
-    add: [['masonry', 'Укладка газоблока 300 мм', 10], ['walls', 'Штукатурка стен цементной смесью под маячок', 50], ['floors', 'Выравнивание пола стяжкой', 40]] },
-];
+/* =========================================================
+   КАЛЬКУЛЯТОР (квиз): объект → площадь → работы → итог
+   F — площадь пола, W — площадь стен, P — периметр (плинтус).
+   Объёмы примерные, точная смета — после замера.
+   ========================================================= */
+window.CALC = {
+  objects: [
+    { id: 'bath',  title: 'Санузел',  icon: 'bath',  min: 5,  def: 4,  presets: [3, 4, 6, 8],
+      geo: F => ({ F, W: Math.max(0, 4 * Math.sqrt(F) * 2.5 - 1.6), P: 4 * Math.sqrt(F) }),
+      works: ['tile_floor', 'tile_walls', 'pipes', 'plumb', 'install', 'ceiling', 'electric'],
+      on: ['tile_floor', 'tile_walls', 'pipes', 'plumb'] },
+    { id: 'flat',  title: 'Квартира', icon: 'flat',  min: 10, def: 45, presets: [30, 45, 60, 80],
+      geo: F => ({ F, W: F * 2.5, P: F * 0.8 }),
+      works: ['level', 'paint', 'wallpaper', 'screed', 'laminate', 'ceiling', 'pipes', 'plumb', 'electric'],
+      on: ['paint', 'screed', 'laminate', 'electric'] },
+    { id: 'room',  title: 'Комната',  icon: 'room',  min: 20, def: 20, presets: [20, 25, 30, 40],
+      geo: F => ({ F, W: F * 2.4, P: 4 * Math.sqrt(F) }),
+      works: ['level', 'paint', 'wallpaper', 'screed', 'laminate', 'ceiling', 'electric'],
+      on: ['wallpaper', 'laminate'] },
+    { id: 'house', title: 'Дом',      icon: 'house', min: 10, def: 90, presets: [60, 90, 120, 150],
+      geo: F => ({ F, W: F * 2.5, P: F * 0.8 }),
+      works: ['level', 'paint', 'wallpaper', 'screed', 'laminate', 'ceiling', 'pipes', 'plumb', 'electric'],
+      on: ['level', 'paint', 'screed', 'laminate', 'pipes', 'electric'] },
+  ],
+  works: {
+    level:      { title: 'Выравнивание стен по маякам', items: [['walls', 'Штукатурка стен гипсовым раствором под маячок', g => g.W]] },
+    paint:      { title: 'Подготовка и покраска стен', items: [['walls', 'Подготовка стен под покраску', g => g.W], ['walls', 'Окраска, 1 слой', g => g.W * 2]] },
+    wallpaper:  { title: 'Шпаклёвка и обои', items: [['walls', 'Шпаклёвка финишная, 1 слой', g => g.W], ['walls', 'Оклейка обоев с подгонкой рисунка', g => g.W]] },
+    screed:     { title: 'Стяжка пола', items: [['floors', 'Выравнивание пола стяжкой', g => g.F]] },
+    laminate:   { title: 'Ламинат и плинтус', items: [['floors', 'Укладка ламината', g => g.F], ['floors', 'Монтаж плинтуса', g => g.P]] },
+    tile_floor: { title: 'Плитка на пол', items: [['floors', 'Укладка плитки', g => g.F]] },
+    tile_walls: { title: 'Плитка на стены', items: [['floors', 'Укладка плитки', g => g.W]] },
+    ceiling:    { title: 'Потолок из гипсокартона', items: [['walls', 'Каркасный потолок из гипсокартона', g => g.F]] },
+    pipes:      { title: 'Трубы воды и канализации', items: [['water', 'Полипропиленовая труба Ø20–25', () => 8], ['sewer', 'Труба ПВХ Ø30/40/50', () => 4], ['sewer', 'Труба ПВХ Ø100', () => 2]] },
+    plumb:      { title: 'Унитаз, раковина, смесители', items: [['plumbing', 'Установка унитаза, раковины, мойки, поддона', () => 2], ['plumbing', 'Монтаж смесителя на раковину или мойку', () => 1], ['plumbing', 'Монтаж смесителя для душа', () => 1]] },
+    install:    { title: 'Инсталляция для унитаза', items: [['plumbing', 'Установка инсталляции', () => 1]] },
+    electric:   { title: 'Электрика (по замеру)', items: [['electric', 'Прокладка или замена электропроводки', () => 1]] },
+  },
+};
