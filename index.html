@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Мастер Евгений — ремонт, отделка, сантехника и электрика в Перми</title>
+  <meta name="description" content="Ремонт квартир, домов и санузлов под ключ в Перми. Прозрачный прайс, онлайн-смета, бесплатный замер, договор, гарантия и поэтапная оплата.">
+  <!-- Демо-версия: не индексировать до согласования с владельцем -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#141414">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- SVG-иконки -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-wall" viewBox="0 0 24 24"><path d="M3 5h18v14H3zM3 10h18M3 15h18M9 5v5M15 10v5M9 15v4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-floor" viewBox="0 0 24 24"><path d="M2 18l5-12h10l5 12zM7 6l-2 12M12 6v12M17 6l2 12M4 13h16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+  <symbol id="i-brick" viewBox="0 0 24 24"><path d="M3 4h18v16H3zM3 8h18M3 12h18M3 16h18M8 4v4M15 4v4M11 8v4M18 8v4M8 12v4M15 12v4M11 16v4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-pipe" viewBox="0 0 24 24"><path d="M3 8h8a4 4 0 014 4v9M3 12h8M15 21h4V12a8 8 0 00-8-8H3" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-drain" viewBox="0 0 24 24"><path d="M12 3v6M8 9h8l-1 4H9zM10 13v4a2 2 0 004 0v-4M5 21h14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+  <symbol id="i-tap" viewBox="0 0 24 24"><path d="M4 9h9a4 4 0 014 4v1h3v-2M8 9V5h5M10.5 5V3M17 17v1M17 20.5v.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<header class="header" id="header">
+  <div class="container header__row">
+    <a href="#top" class="brand"><span class="brand__mark">МЕ</span><span class="brand__name">Мастер Евгений<small>ремонт · Пермь</small></span></a>
+    <nav class="nav" id="nav" aria-label="Основное меню">
+      <a href="#services">Услуги</a>
+      <a href="#packs">Под ключ</a>
+      <a href="#price">Прайс</a>
+      <a href="#how">Как работаем</a>
+      <a href="#works">Объекты</a>
+    </nav>
+    <button class="cart-btn" id="cartBtn" aria-label="Открыть смету">
+      <span>Смета</span><b id="cartCount">0</b>
+    </button>
+    <button class="burger" id="burger" aria-label="Открыть меню" aria-expanded="false"><span></span><span></span></button>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero__grid-bg" aria-hidden="true"></div>
+    <div class="container hero__grid">
+      <div class="hero__text">
+        <p class="tag"><i></i>Пермь · бесплатный выезд на замер</p>
+        <h1>Ремонт, отделка, сантехника и&nbsp;электрика&nbsp;— <span>в&nbsp;одних руках</span></h1>
+        <p class="hero__lead">От демонтажа до последней розетки. Сами закупаем материалы, работаем по договору с гарантией, оплата поэтапно.</p>
+        <div class="hero__actions">
+          <a class="btn btn--accent" href="#packs">Собрать смету <svg><use href="#i-arrow"/></svg></a>
+          <a class="btn btn--line" href="#price">Смотреть прайс</a>
+        </div>
+        <ul class="hero__trust">
+          <li><svg><use href="#i-check"/></svg>Договор и акт</li>
+          <li><svg><use href="#i-check"/></svg>Гарантия на работу</li>
+          <li><svg><use href="#i-check"/></svg>Поэтапная оплата</li>
+        </ul>
+      </div>
+      <div class="hero__visual">
+        <figure class="hv hv--1"><img src="img/interior.jpg" alt="Готовый интерьер"></figure>
+        <figure class="hv hv--2"><img src="img/ceiling-2.jpg" alt="Монтаж каркаса потолка"></figure>
+        <div class="hv-card">
+          <span>Прайс на сайте</span>
+          <b><span id="heroCount">60</span>+ позиций</b>
+          <small>каждую можно добавить в смету</small>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="section" id="services">
+    <div class="container">
+      <div class="head">
+        <p class="kicker">01 · Услуги</p>
+        <h2>Всё, что нужно для ремонта, <span>в одной системе</span></h2>
+        <p class="sub">Нажмите на услугу: откроется её прайс, и любую позицию можно сразу добавить в смету.</p>
+      </div>
+      <div class="services" id="servicesGrid"></div>
+    </div>
+  </section>
+
+  <!-- PACKS -->
+  <section class="section section--dark" id="packs">
+    <div class="container">
+      <div class="head">
+        <p class="kicker">02 · Под ключ</p>
+        <h2>Выберите объект — <span>мы соберём смету</span></h2>
+        <p class="sub">Пакет добавит в смету типовой набор работ с примерными объёмами. Объёмы можно поправить, а точную смету мастер составит после бесплатного замера.</p>
+      </div>
+      <div class="packs" id="packsGrid"></div>
+    </div>
+  </section>
+
+  <!-- PRICE -->
+  <section class="section" id="price">
+    <div class="container">
+      <div class="head head--row">
+        <div>
+          <p class="kicker">03 · Прайс</p>
+          <h2>Прозрачные цены <span>за работу</span></h2>
+        </div>
+        <label class="search"><input id="search" type="search" placeholder="Найти работу: плитка, гипсокартон, смеситель…" autocomplete="off"></label>
+      </div>
+      <div class="tabs" id="tabs" role="tablist"></div>
+      <div class="price" id="priceList"></div>
+      <p class="note">Цены указаны за работу, без материалов. «от» означает, что итог зависит от сложности и объёма. Материалы мастер закупает сам по согласованию.</p>
+    </div>
+  </section>
+
+  <!-- HOW -->
+  <section class="section section--grey" id="how">
+    <div class="container">
+      <div class="head">
+        <p class="kicker">04 · Как работаем</p>
+        <h2>Пять шагов <span>от заявки до ключей</span></h2>
+      </div>
+      <ol class="steps">
+        <li><b>01</b><h3>Заявка и смета</h3><p>Соберите смету на сайте или просто опишите задачу.</p></li>
+        <li><b>02</b><h3>Бесплатный замер</h3><p>Мастер выезжает на объект, уточняет объёмы и детали.</p></li>
+        <li><b>03</b><h3>Договор</h3><p>Фиксируем работы и цены. Шаблоны: договор, расписка, акт.</p></li>
+        <li><b>04</b><h3>Работы по этапам</h3><p>Неполная предоплата, дальше оплата за каждый принятый этап.</p></li>
+        <li><b>05</b><h3>Сдача и гарантия</h3><p>Подписываем акт, на работу действует гарантия.</p></li>
+      </ol>
+      <div class="facts">
+        <div><b>3 года</b><span>опыт в ремонте</span></div>
+        <div><b>Пн–Пт</b><span>работы 9:00–21:00</span></div>
+        <div><b>7 дней</b><span>на связи 9:00–21:00</span></div>
+        <div><b>По проекту</b><span>работаем по готовому дизайн-проекту</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WORKS -->
+  <section class="section" id="works">
+    <div class="container">
+      <div class="head">
+        <p class="kicker">05 · Объекты</p>
+        <h2>Работы <span>мастера</span></h2>
+        <p class="sub">Каждое фото связано с услугой: нажмите на подпись, чтобы открыть её прайс.</p>
+      </div>
+      <div class="works">
+        <figure class="work work--big"><img src="img/interior.jpg" alt="Готовый интерьер" loading="lazy"><figcaption><span>Отделка интерьера</span><button data-goto="walls">Стены и потолки <svg><use href="#i-arrow"/></svg></button></figcaption></figure>
+        <figure class="work"><img src="img/tile.jpg" alt="Укладка плитки с системой выравнивания" loading="lazy"><figcaption><span>Укладка плитки</span><button data-goto="floors">Полы и плитка <svg><use href="#i-arrow"/></svg></button></figcaption></figure>
+        <figure class="work"><img src="img/ceiling-1.jpg" alt="Каркас потолка из профиля" loading="lazy"><figcaption><span>Каркасный потолок</span><button data-goto="walls">Гипсокартон <svg><use href="#i-arrow"/></svg></button></figcaption></figure>
+        <figure class="work"><img src="img/ceiling-2.jpg" alt="Монтаж каркаса и коммуникаций" loading="lazy"><figcaption><span>Монтаж каркаса</span><button data-goto="walls">Стены и потолки <svg><use href="#i-arrow"/></svg></button></figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- REQUEST -->
+  <section class="section section--dark" id="request">
+    <div class="container request">
+      <div>
+        <p class="kicker">06 · Заявка</p>
+        <h2>Ваша смета <span>уже в заявке</span></h2>
+        <p class="sub">Всё, что вы добавили в смету, подставится в сообщение автоматически. Мастер перезвонит и согласует время замера.</p>
+        <div class="request__sum">
+          <span>Предварительно по смете</span>
+          <b id="reqTotal">0 ₽</b>
+          <small id="reqItems">Смета пока пустая — добавьте работы из прайса или пакета</small>
+        </div>
+      </div>
+      <form class="form" id="reqForm">
+        <label>Имя<input name="name" required autocomplete="given-name"></label>
+        <label>Телефон<input name="phone" type="tel" required autocomplete="tel" placeholder="+7"></label>
+        <label>Объект
+          <select name="object"><option>Квартира</option><option>Дом</option><option>Комната</option><option>Санузел</option></select>
+        </label>
+        <label>Что нужно сделать<textarea name="comment" rows="3" placeholder="Например: санузел 4 м², плитка, замена труб"></textarea></label>
+        <button class="btn btn--accent btn--full" type="submit">Отправить заявку <svg><use href="#i-arrow"/></svg></button>
+        <p class="form__note" id="formNote"></p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container footer__row">
+    <a href="#top" class="brand"><span class="brand__mark">МЕ</span><span class="brand__name">Мастер Евгений<small>ремонт · Пермь</small></span></a>
+    <p>Ремонт квартир, домов и санузлов под ключ · Пермь</p>
+    <a class="footer__avito" id="avitoLink" target="_blank" rel="noopener">Профиль на Авито <svg><use href="#i-arrow"/></svg></a>
+  </div>
+</footer>
+
+<!-- CART / СМЕТА -->
+<aside class="cart" id="cart" aria-label="Смета" hidden>
+  <div class="cart__head">
+    <h3>Смета</h3>
+    <button class="cart__close" id="cartClose" aria-label="Закрыть">×</button>
+  </div>
+  <div class="cart__list" id="cartList"></div>
+  <div class="cart__foot">
+    <div class="cart__total"><span>Итого за работы</span><b id="cartTotal">0 ₽</b></div>
+    <p class="cart__hint">Предварительный расчёт по прайсу, без материалов. Точная смета после замера.</p>
+    <div class="cart__actions">
+      <button class="btn btn--line btn--sm" id="cartClear">Очистить</button>
+      <a class="btn btn--accent btn--sm" href="#request" id="cartToReq">Оформить заявку</a>
+    </div>
+  </div>
+</aside>
+<div class="cart-shade" id="cartShade" hidden></div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- Демо-плашка разработчика (убрать после согласования) -->
+<div class="demo-badge" id="demoBadge">
+  <span>Демо-версия сайта</span>
+  <a id="devLink" target="_blank" rel="noopener"></a>
+  <button aria-label="Скрыть" id="demoClose">×</button>
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
